@@ -1,19 +1,55 @@
 import mongoose from "mongoose";
 
-/**
- * User Model
- *
- * Defines the MongoDB schema for platform users (citizens, admins).
- *
- * @example
- *  const userSchema = new mongoose.Schema({
- *    name:     { type: String, required: true, trim: true },
- *    email:    { type: String, required: true, unique: true, lowercase: true },
- *    password: { type: String, required: true, select: false },
- *    role:     { type: String, enum: ["citizen","admin"], default: "citizen" },
- *    avatar:   { type: String },
- *  }, { timestamps: true });
- */
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, "Name is required"],
+      trim: true,
+      minlength: [2, "Name must be at least 2 characters"],
+      maxlength: [50, "Name cannot exceed 50 characters"]
+    },
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      unique: true,
+      trim: true,
+      lowercase: true,
+      match: [
+        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+        "Please provide a valid email address"
+      ]
+    },
+    password: {
+      type: String,
+      required: [true, "Password is required"],
+      minlength: [8, "Password must be at least 8 characters"],
+      select: false // Prevents returning the password in queries by default
+    },
+    role: {
+      type: String,
+      required: [true, "Role is required"],
+      enum: {
+        values: ["citizen", "representative", "admin"],
+        message: "Role must be citizen, representative, or admin"
+      },
+      default: "citizen"
+    },
+    constituency: {
+      type: String,
+      required: [true, "Constituency is required"],
+      trim: true
+    }
+  },
+  {
+    timestamps: true // Automatically adds createdAt and updatedAt fields
+  }
+);
 
-// TODO: Define schema and export model
-// export default mongoose.model("User", userSchema);
+// Add single-field indexes for high-speed queries on emails and constituencies
+userSchema.index({ email: 1 });
+userSchema.index({ constituency: 1 });
+
+const User = mongoose.model("User", userSchema);
+
+export default User;
