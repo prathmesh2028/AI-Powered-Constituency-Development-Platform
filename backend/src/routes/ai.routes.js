@@ -8,6 +8,10 @@ import { Router } from "express";
 
 const router = Router();
 
-// TODO: Define routes
+import { summariseIssues, suggestPriorities, analyzeSentiment, analyzeSuggestion } from "../controllers/ai.controller.js";
 
+router.post("/summarise", summariseIssues);
+router.get("/suggest-priorities", suggestPriorities);
+router.post("/analyze-sentiment", analyzeSentiment);
+router.post("/analyze-suggestion", analyzeSuggestion);
 export default router;

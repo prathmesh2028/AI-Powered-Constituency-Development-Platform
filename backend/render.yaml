@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: constituency-api
+    env: node
+    plan: free # Can be upgraded to starter/pro for production
+    region: ohio # Adjust based on your primary user base
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: MONGODB_URI
+        sync: false # Set manually in Render dashboard for security
+      - key: GEMINI_API_KEY
+        sync: false # Set manually in Render dashboard for security
+      - key: CORS_ORIGIN
+        value: https://your-frontend-domain.com # Update this to your deployed React/Vue app URL

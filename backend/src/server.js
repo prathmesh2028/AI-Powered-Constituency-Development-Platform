@@ -10,6 +10,15 @@ import app from "./app.js";
  *  3. Register graceful-shutdown hooks
  */
 const startServer = async () => {
+  // 0 ── Environment Validation ────────────────────────
+  const requiredEnvVars = ["PORT", "MONGODB_URI", "GEMINI_API_KEY"];
+  const missingEnvVars = requiredEnvVars.filter((envVar) => !process.env[envVar]);
+  
+  if (missingEnvVars.length > 0) {
+    console.error(`💥 FATAL ERROR: Missing required environment variables: ${missingEnvVars.join(", ")}`);
+    process.exit(1);
+  }
+
   // 1 ── Database ──────────────────────────────────────
   await connectDB();
 

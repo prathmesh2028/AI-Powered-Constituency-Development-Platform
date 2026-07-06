@@ -8,8 +8,14 @@ import { errorHandler } from "./middlewares/error.middleware.js";
 // ── Express app ─────────────────────────────────────────
 const app = express();
 
-// ── Security headers ────────────────────────────────────
+// Trust reverse proxy (required if deployed behind Render/Heroku/AWS LB)
+app.set('trust proxy', 1);
+
+import { globalRateLimiter } from "./middlewares/rateLimiter.middleware.js";
+
+// ── Security headers & Rate Limiting ────────────────────
 app.use(helmet());
+app.use("/api/", globalRateLimiter); // Apply global limit to all API routes
 
 // ── Request logging ─────────────────────────────────────
 app.use(morgan(config.isDev ? "dev" : "combined"));
@@ -39,7 +45,29 @@ app.use("/uploads", express.static("uploads"));
 //  ROUTES — register your routers below this line
 // ─────────────────────────────────────────────────────────
 import mountRoutes from "./routes/index.js";
+import { requestLogger } from "./middlewares/logger.middleware.js";
+
+// Optional: You could use requestLogger alongside morgan if you want custom formats
+app.use(requestLogger);
+
 mountRoutes(app);
+
+// ── Root endpoint ───────────────────────────────────────
+app.get("/", (_req, res) => {
+  res.status(200).send(`
+    <html>
+      <body style="font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f4f8; margin: 0;">
+        <div style="text-align: center; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+          <h1 style="color: #2c3e50;">🏛️ Constituency Platform API</h1>
+          <p style="color: #7f8c8d; font-size: 1.1em;">The backend is running successfully!</p>
+          <div style="margin-top: 20px;">
+            <a href="/api/health" style="display: inline-block; padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">Check Health Status</a>
+          </div>
+        </div>
+      </body>
+    </html>
+  `);
+});
 
 // ── Health-check endpoint ───────────────────────────────
 app.get("/api/health", (_req, res) => {
@@ -50,13 +78,10 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
+import { notFoundHandler } from "./middlewares/notFound.middleware.js";
+
 // ── 404 handler ─────────────────────────────────────────
-app.use((_req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "Route not found",
-  });
-});
+app.use(notFoundHandler);
 
 // ── Global error handler ────────────────────────────────
 app.use(errorHandler);

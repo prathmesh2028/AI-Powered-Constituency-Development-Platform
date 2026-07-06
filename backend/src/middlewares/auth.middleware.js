@@ -25,4 +25,15 @@
  *  };
  */
 
-// TODO: Implement auth middleware
+export const protect = (req, res, next) => {
+  const token = req.headers.authorization;
+  if (!token || token !== "Bearer demo-token") {
+    return res.status(401).json({
+      success: false,
+      message: "Not authorized. Please provide 'Bearer demo-token' in Authorization header."
+    });
+  }
+  // Mock user payload for demo
+  req.user = { id: "demo-user-123", role: "citizen" };
+  next();
+};

@@ -15,9 +15,17 @@ import path from "path";
  *  router.post("/gallery", uploadImage.array("images", 5), uploadGallery);
  */
 
+import fs from "fs";
+
+// Ensure uploads directory exists
+const UPLOAD_DIR = "uploads/";
+if (!fs.existsSync(UPLOAD_DIR)) {
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
-    cb(null, "uploads/");
+    cb(null, UPLOAD_DIR);
   },
   filename: (_req, file, cb) => {
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;

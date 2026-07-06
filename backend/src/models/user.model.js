@@ -46,8 +46,7 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Add single-field indexes for high-speed queries on emails and constituencies
-userSchema.index({ email: 1 });
+// Add single-field index for high-speed queries on constituencies
 userSchema.index({ constituency: 1 });
 
 const User = mongoose.model("User", userSchema);

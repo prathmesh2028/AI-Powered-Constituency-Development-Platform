@@ -44,6 +44,9 @@ export const errorHandler = (err, _req, res, _next) => {
   res.status(statusCode).json({
     success: false,
     message: config.isDev || isOperational ? error.message : "Internal server error",
-    ...(config.isDev && { stack: error.stack }),
+    error: {
+      ...(config.isDev && { stack: error.stack }),
+      ...(error.errors && { details: error.errors })
+    }
   });
 };

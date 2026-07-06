@@ -1,4 +1,11 @@
 {
+  "name": "constituency-dev-platform",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "npm start --prefix backend",
+    "dev": "npm run dev --prefix backend",
+    "install:backend": "npm install --prefix backend"
+  },
   "dependencies": {
     "express-rate-limit": "^8.5.2"
   }

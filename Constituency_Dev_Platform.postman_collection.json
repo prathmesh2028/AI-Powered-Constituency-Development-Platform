@@ -1,0 +1,220 @@
+{
+  "info": {
+    "name": "Constituency Dev Platform APIs",
+    "description": "Complete API collection for the AI-powered constituency development platform.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "citizenId",
+      "value": "664c8c7f9f1b2c001a1b2c3d",
+      "type": "string"
+    },
+    {
+      "key": "suggestionId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Uploads",
+      "item": [
+        {
+          "name": "Upload Image",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/upload/image",
+              "host": ["{{baseUrl}}"],
+              "path": ["upload", "image"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Suggestions",
+      "item": [
+        {
+          "name": "Create Suggestion",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success) { pm.collectionVariables.set('suggestionId', jsonData.data._id); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"citizenId\": \"{{citizenId}}\",\n  \"title\": \"Fix potholes on Main St\",\n  \"description\": \"There are massive potholes near the school causing traffic.\",\n  \"category\": \"infrastructure\",\n  \"constituency\": \"North Ward\",\n  \"phoneNumber\": \"9876543210\",\n  \"village\": \"Springfield\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/suggestions",
+              "host": ["{{baseUrl}}"],
+              "path": ["suggestions"]
+            }
+          }
+        },
+        {
+          "name": "Get All Suggestions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/suggestions",
+              "host": ["{{baseUrl}}"],
+              "path": ["suggestions"]
+            }
+          }
+        },
+        {
+          "name": "Get Suggestion by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/suggestions/{{suggestionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["suggestions", "{{suggestionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Suggestion Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"under_review\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/suggestions/{{suggestionId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["suggestions", "{{suggestionId}}", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI Services",
+      "item": [
+        {
+          "name": "Analyze Suggestion (Gemini)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"suggestionText\": \"The bridge on river road is structurally failing and could collapse soon.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ai/analyze-suggestion",
+              "host": ["{{baseUrl}}"],
+              "path": ["ai", "analyze-suggestion"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboards",
+      "item": [
+        {
+          "name": "Suggestion Dashboard (Unified)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/suggestions?constituency=North Ward",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "suggestions"],
+              "query": [
+                { "key": "constituency", "value": "North Ward" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Issues (Legacy)",
+      "item": [
+        {
+          "name": "Get All Issues",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/issues",
+              "host": ["{{baseUrl}}"],
+              "path": ["issues"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Representatives (Legacy)",
+      "item": [
+        {
+          "name": "Get All Representatives",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/representatives",
+              "host": ["{{baseUrl}}"],
+              "path": ["representatives"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

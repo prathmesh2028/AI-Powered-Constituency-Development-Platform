@@ -16,6 +16,14 @@ import { Router } from "express";
 
 const router = Router();
 
-// TODO: Define routes
+import { createIssue, getIssues, getIssueById, updateIssue, deleteIssue } from "../controllers/issue.controller.js";
+import { validateRequest } from "../middlewares/validation.middleware.js";
+import { protect } from "../middlewares/auth.middleware.js";
+import { createIssueSchema } from "../schemas/issue.schema.js";
 
+router.post("/", protect, validateRequest(createIssueSchema), createIssue);
+router.get("/", getIssues);
+router.get("/:id", getIssueById);
+router.put("/:id", validateRequest(createIssueSchema), updateIssue);
+router.delete("/:id", deleteIssue);
 export default router;
