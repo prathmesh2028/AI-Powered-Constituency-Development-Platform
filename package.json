@@ -2,6 +2,7 @@
   "name": "constituency-dev-platform",
   "version": "1.0.0",
   "scripts": {
+    "postinstall": "npm install --prefix backend",
     "start": "npm start --prefix backend",
     "dev": "npm run dev --prefix backend",
     "install:backend": "npm install --prefix backend"
