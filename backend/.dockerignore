@@ -1,0 +1,11 @@
+node_modules
+npm-debug.log
+.env
+.env.local
+.git
+.gitignore
+check_db.js
+force_seed.js
+test_gemini.js
+nodemon.json
+uploads

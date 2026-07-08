@@ -1,12 +1,18 @@
 # Dependencies
 node_modules/
 
-# Environment Variables (CRITICAL)
+# Environment — NEVER commit these
 .env
-backend/.env
+.env.local
+.env.production
+.env.development
+.env.staging
+
+# Next.js build output
+.next/
+out/
 
 # Logs
-logs/
 *.log
 npm-debug.log*
 
@@ -17,12 +23,8 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
-.gemini/
 
-# Uploads
-backend/uploads/*
-!backend/uploads/.gitkeep
-
-# Build
-dist/
-build/
+# Scratch / temp scripts
+backend/check_db.js
+backend/force_seed.js
+backend/test_gemini.js
