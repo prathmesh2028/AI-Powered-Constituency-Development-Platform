@@ -41,7 +41,7 @@ COPY backend/src/ ./backend/src/
 
 # ── Frontend: copy Next.js standalone output ───
 COPY frontend/public/ ./frontend/public/
-COPY --from=frontend-builder /app/frontend/.next/standalone/frontend/ ./frontend/
+COPY --from=frontend-builder /app/frontend/.next/standalone/ ./frontend/
 COPY --from=frontend-builder /app/frontend/.next/static/ ./frontend/.next/static/
 
 # ── Startup script ─────────────────────────────
