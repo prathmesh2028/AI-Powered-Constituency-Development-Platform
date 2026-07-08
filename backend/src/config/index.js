@@ -42,6 +42,7 @@ if (config.isProd) {
     console.error(
       `❌ Missing required environment variables: ${missing.join(", ")}`
     );
+    console.error(`💡 GCP Cloud Run Setup Tip: Make sure you have created the secrets (e.g. MONGODB_URI, GEMINI_API_KEY) in GCP Secret Manager and mapped them as environment variables in Cloud Run, or set them as environment variables directly.`);
     process.exit(1);
   }
 }

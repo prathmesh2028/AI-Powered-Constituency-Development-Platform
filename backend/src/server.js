@@ -16,6 +16,7 @@ const startServer = async () => {
   
   if (missingEnvVars.length > 0) {
     console.error(`💥 FATAL ERROR: Missing required environment variables: ${missingEnvVars.join(", ")}`);
+    console.error(`💡 GCP Cloud Run Setup Tip: Make sure you have created the secrets (e.g. MONGODB_URI, GEMINI_API_KEY) in GCP Secret Manager and mapped them as environment variables in Cloud Run, or set them as environment variables directly.`);
     process.exit(1);
   }
 

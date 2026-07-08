@@ -252,7 +252,13 @@ const connectDB = async () => {
     return conn;
   } catch (error) {
     console.error(`❌ MongoDB connection failed: ${error.message}`);
-    process.exit(1);
+    console.error(`💡 GCP Cloud Run Setup Tip: If the application is failing to connect in production:
+    1. Ensure your MongoDB Atlas cluster has 'Network Access' set to allow access from 0.0.0.0/0 (required since Cloud Run IPs are dynamic).
+    2. Check that the MONGODB_URI secret is set correctly in GCP Secret Manager.
+    3. Make sure the Cloud Run Service Account has the 'Secret Manager Secret Accessor' role.`);
+    // Do NOT call process.exit(1) here. This allows the server to still listen on the port,
+    // which prevents Cloud Run startup/liveness probe failures, so developers can hit health checks and read logs.
+    return null;
   }
 };
 

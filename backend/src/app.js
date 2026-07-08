@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import mongoose from "mongoose";
 import config from "./config/index.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
 
@@ -71,8 +72,21 @@ app.get("/", (_req, res) => {
 
 // ── Health-check endpoint ───────────────────────────────
 app.get("/api/health", (_req, res) => {
+  const dbStates = {
+    0: "disconnected",
+    1: "connected",
+    2: "connecting",
+    3: "disconnecting"
+  };
+  const readyState = mongoose.connection.readyState;
+  const dbStatus = dbStates[readyState] || "unknown";
+
   res.status(200).json({
-    status: "ok",
+    status: dbStatus === "connected" ? "ok" : "degraded",
+    database: {
+      status: dbStatus,
+      readyState: readyState
+    },
     environment: config.nodeEnv,
     timestamp: new Date().toISOString(),
   });
