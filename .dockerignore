@@ -1,0 +1,13 @@
+**/node_modules
+**/.next
+frontend/.env
+frontend/.env.local
+backend/.env
+backend/.env.local
+.git
+.gitignore
+backend/check_db.js
+backend/force_seed.js
+backend/test_gemini.js
+backend/uploads
+*.md
