@@ -71,7 +71,7 @@ app.get("/", (_req, res) => {
 });
 
 // ── Health-check endpoint ───────────────────────────────
-app.get("/api/health", (_req, res) => {
+app.get(["/api/health", "/api/v1/health"], (_req, res) => {
   const dbStates = {
     0: "disconnected",
     1: "connected",
