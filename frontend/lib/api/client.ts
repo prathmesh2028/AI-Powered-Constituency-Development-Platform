@@ -63,6 +63,22 @@ export interface AIPriorityRecommendation {
   priorities: string; // The markdown response from suggestPriorities
 }
 
+export interface Decision {
+  _id: string;
+  suggestionId?: { _id: string; title: string; category: string; village: string; description: string };
+  constituency: string;
+  village?: string;
+  action: "Dispatch Volunteers" | "Open Gates" | "Close Gates" | "Broadcast Messages" | "Medical Escalation" | "Transport Diversion" | "Parking Redirection";
+  decision: string;
+  reason: string;
+  expectedImpact: string;
+  responsibleTeam: string;
+  eta: string;
+  status: "pending" | "executed" | "cancelled";
+  createdAt: string;
+  updatedAt: string;
+}
+
 const API_BASE_URL = typeof window === "undefined"
   ? ((process.env.BACKEND_URL || "http://localhost:5000") + "/api/v1")
   : "/api/v1";
@@ -197,6 +213,65 @@ export const api = {
         body: JSON.stringify({ issues }),
       });
     },
+
+    agentChatStream: async (
+      payload: { query: string; constituency: string; agentType?: string; taskType?: string },
+      onChunk: (data: { text: string; agentType: string; contextSuggestions: any[]; isFallback?: boolean }) => void,
+      onDone?: () => void,
+      onError?: (err: Error) => void
+    ) => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/agents/agent-chat`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer demo-token"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to establish chat stream: ${response.status}`);
+        }
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        if (!reader) {
+          throw new Error("ReadableStream is not supported or body is null.");
+        }
+
+        let buffer = "";
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith("data: ")) {
+              const dataContent = trimmedLine.replace("data: ", "").trim();
+              if (dataContent === "[DONE]") {
+                if (onDone) onDone();
+                return;
+              }
+              try {
+                const parsed = JSON.parse(dataContent);
+                onChunk(parsed);
+              } catch (parseErr) {
+                console.warn("Failed to parse stream JSON:", parseErr);
+              }
+            }
+          }
+        }
+        if (onDone) onDone();
+      } catch (err: any) {
+        if (onError) onError(err);
+        else console.error("Stream reading error:", err);
+      }
+    },
   },
 
   // ── File Upload ───────────────────────────────────────
@@ -207,6 +282,31 @@ export const api = {
       return fetcher<{ url: string; filename: string; size: number }>("/upload/image", {
         method: "POST",
         body: formData,
+      });
+    },
+  },
+
+  // ── Decision Engine ──────────────────────────────────
+  decisions: {
+    list: (params: { constituency?: string; status?: string } = {}) => {
+      const query = new URLSearchParams();
+      if (params.constituency) query.set("constituency", params.constituency);
+      if (params.status) query.set("status", params.status);
+      
+      const queryString = query.toString() ? `?${query.toString()}` : "";
+      return fetcher<Decision[]>(`/decisions${queryString}`);
+    },
+
+    updateStatus: (id: string, status: Decision["status"]) => {
+      return fetcher<Decision>(`/decisions/${id}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status }),
+      });
+    },
+
+    evaluate: (suggestionId: string) => {
+      return fetcher<Decision[]>(`/decisions/evaluate/${suggestionId}`, {
+        method: "POST",
       });
     },
   },

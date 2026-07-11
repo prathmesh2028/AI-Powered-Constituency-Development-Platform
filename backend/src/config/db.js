@@ -212,11 +212,13 @@ const seedDatabase = async () => {
       }
     ];
 
+    const { evaluateAndLogDecisionsForSuggestion } = await import("../services/decisionEngine.service.js");
     for (const item of seedData) {
-      const exists = await Suggestion.findOne({ constituency: item.constituency, title: item.title });
-      if (!exists) {
-        await new Suggestion(item).save();
+      let doc = await Suggestion.findOne({ constituency: item.constituency, title: item.title });
+      if (!doc) {
+        doc = await new Suggestion(item).save();
       }
+      await evaluateAndLogDecisionsForSuggestion(doc);
     }
     console.log("✅ Database seeded successfully with authentic constituency-specific data.");
   } catch (err) {

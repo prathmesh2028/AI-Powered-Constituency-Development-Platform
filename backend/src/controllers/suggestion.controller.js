@@ -245,18 +245,20 @@ export const seedSuggestions = catchAsync(async (req, res) => {
   ];
 
   let inserted = 0;
+  const { evaluateAndLogDecisionsForSuggestion } = await import("../services/decisionEngine.service.js");
   for (const item of seedData) {
-    const exists = await Suggestion.findOne({ constituency: item.constituency, title: item.title });
-    if (!exists) {
-      await new Suggestion(item).save();
+    let doc = await Suggestion.findOne({ constituency: item.constituency, title: item.title });
+    if (!doc) {
+      doc = await new Suggestion(item).save();
       inserted++;
     }
+    await evaluateAndLogDecisionsForSuggestion(doc);
   }
 
   const counts = await Suggestion.aggregate([
     { $group: { _id: "$constituency", count: { $sum: 1 } } }
   ]);
 
-  res.status(200).json({ success: true, message: `Successfully seeded suggestions. Inserted ${inserted} items.`, counts });
+  res.status(200).json({ success: true, message: `Successfully seeded suggestions. Inserted ${inserted} items. Decisions logged.`, counts });
 });
 

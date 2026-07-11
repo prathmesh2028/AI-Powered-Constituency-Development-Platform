@@ -7,12 +7,17 @@ import {
   Home,
   FileText,
   Search,
-  LayoutDashboard,
   BarChart3,
   BrainCircuit,
   Menu,
   X,
   Sparkles,
+  Sliders,
+  MessageSquare,
+  Activity,
+  Ticket,
+  ClipboardList,
+  History,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -28,9 +33,14 @@ export function Sidebar({ className }: SidebarProps) {
     { name: "Home", href: "/", icon: Home },
     { name: "Submit Suggestion", href: "/submit", icon: FileText },
     { name: "Track Status", href: "/track", icon: Search },
-    { name: "MP Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Command Center", href: "/command-center", icon: Activity, badge: "Live" },
     { name: "Analytics", href: "/analytics", icon: BarChart3 },
     { name: "AI Recommendations", href: "/recommendations", icon: BrainCircuit, badge: "Gemini 2.0" },
+    { name: "Decision Engine", href: "/decisions", icon: Sliders, badge: "Rule Engine" },
+    { name: "AI Agent Chat", href: "/chat", icon: MessageSquare, badge: "Multi-Agent" },
+    { name: "Fan Portal", href: "/fan-portal", icon: Ticket, badge: "New" },
+    { name: "Volunteer Copilot", href: "/volunteer", icon: ClipboardList, badge: "Copilot" },
+    { name: "Scenario Replay", href: "/replay", icon: History, badge: "Simulation" },
   ];
 
   return (

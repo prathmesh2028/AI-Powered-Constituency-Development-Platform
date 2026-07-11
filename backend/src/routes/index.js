@@ -17,6 +17,8 @@ import aiRoutes from "./ai.routes.js";
 import suggestionRoutes from "./suggestion.routes.js";
 import dashboardRoutes from "./dashboard.routes.js";
 import uploadRoutes from "./upload.routes.js";
+import decisionRoutes from "./decision.routes.js";
+import agentRoutes from "./agent.routes.js";
 
 const mountRoutes = (app) => {
   app.use("/api/v1/issues", issueRoutes);
@@ -25,6 +27,8 @@ const mountRoutes = (app) => {
   app.use("/api/v1/suggestions", suggestionRoutes);
   app.use("/api/v1/dashboard", dashboardRoutes);
   app.use("/api/v1/upload", uploadRoutes);
+  app.use("/api/v1/decisions", decisionRoutes);
+  app.use("/api/v1/agents", agentRoutes);
 };
 
 export default mountRoutes;

@@ -16,8 +16,53 @@ export const createSuggestion = async (data) => {
     phoneNumber: data.phoneNumber,
     village: data.village
   });
+
+  // Automatically determine or fall back on priorityScore
+  if (data.priorityScore) {
+    suggestion.priorityScore = data.priorityScore;
+  } else {
+    try {
+      const { analyzeSuggestion } = await import("./gemini.service.js");
+      const analysis = await analyzeSuggestion(data.description);
+      if (analysis && analysis.priority) {
+        suggestion.priorityScore = analysis.priority;
+        if (analysis.category && (!data.category || data.category === "other")) {
+          suggestion.category = analysis.category;
+        }
+      } else {
+        const isUrgent = /urgent|critical|broken|leak|danger|damage|immediately/i.test(data.description);
+        suggestion.priorityScore = isUrgent ? 9 : 6;
+      }
+    } catch (err) {
+      console.warn("Failed to auto-analyze suggestion priority in backend:", err.message);
+      const isUrgent = /urgent|critical|broken|leak|danger|damage|immediately/i.test(data.description);
+      suggestion.priorityScore = isUrgent ? 9 : 6;
+    }
+  }
   
-  return await suggestion.save();
+  const savedSuggestion = await suggestion.save();
+
+  // Evaluate decisions immediately via Rule Engine
+  try {
+    const { evaluateAndLogDecisionsForSuggestion } = await import("./decisionEngine.service.js");
+    await evaluateAndLogDecisionsForSuggestion(savedSuggestion);
+  } catch (decErr) {
+    console.error("Decision Engine evaluation failed on creation:", decErr.message);
+  }
+
+  // Broadcast via WebSockets
+  if (global.wss) {
+    global.wss.clients.forEach(client => {
+      if (client.readyState === 1) { // 1 === OPEN
+        client.send(JSON.stringify({
+          type: "NEW_SUGGESTION",
+          data: savedSuggestion
+        }));
+      }
+    });
+  }
+
+  return savedSuggestion;
 };
 
 /**
@@ -76,9 +121,32 @@ export const getSuggestionById = async (id) => {
  * @returns {Promise<Object>} Updated document
  */
 export const updateSuggestionStatus = async (id, status) => {
-  return await Suggestion.findByIdAndUpdate(
+  const updatedSuggestion = await Suggestion.findByIdAndUpdate(
     id, 
     { status }, 
     { new: true, runValidators: true }
   ).lean();
+
+  if (updatedSuggestion) {
+    try {
+      const { evaluateAndLogDecisionsForSuggestion } = await import("./decisionEngine.service.js");
+      await evaluateAndLogDecisionsForSuggestion(updatedSuggestion);
+    } catch (decErr) {
+      console.error("Decision Engine evaluation failed on status update:", decErr.message);
+    }
+
+    // Broadcast update via WebSockets
+    if (global.wss) {
+      global.wss.clients.forEach(client => {
+        if (client.readyState === 1) {
+          client.send(JSON.stringify({
+            type: "SUGGESTION_UPDATE",
+            data: updatedSuggestion
+          }));
+        }
+      });
+    }
+  }
+
+  return updatedSuggestion;
 };

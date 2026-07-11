@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import config from "./config/index.js";
 import connectDB from "./config/db.js";
 import app from "./app.js";
+import { WebSocketServer } from "ws";
 
 /**
  * Bootstrap sequence:
@@ -29,6 +30,34 @@ const startServer = async () => {
       `🚀 Server running in ${config.nodeEnv} mode on port ${config.port}`
     );
   });
+
+  // 2.5 ── WebSocket Server ─────────────────────────────
+  try {
+    const wss = new WebSocketServer({ server });
+    console.log("🔌 WebSocket server attached to HTTP server");
+
+    wss.on("connection", (ws) => {
+      console.log("🔌 WebSocket client connected");
+      ws.send(JSON.stringify({ type: "WELCOME", message: "Connected to Executive Command Center live updates" }));
+
+      ws.on("message", (message) => {
+        try {
+          const parsed = JSON.parse(message.toString());
+          console.log("📥 Received WebSocket message:", parsed);
+        } catch (e) {
+          console.log("📥 Received raw WebSocket text:", message.toString());
+        }
+      });
+
+      ws.on("close", () => {
+        console.log("🔌 WebSocket client disconnected");
+      });
+    });
+
+    global.wss = wss;
+  } catch (wsErr) {
+    console.error("⚠️ Failed to initialize WebSocket Server:", wsErr.message);
+  }
 
   // 3 ── Graceful shutdown ─────────────────────────────
   const shutdown = async (signal) => {
